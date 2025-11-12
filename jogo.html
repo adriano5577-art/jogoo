@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo de Correspondência - 30 Mulheres</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #4a4a4a 0%, #2c2c2c 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #ff8c00;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: linear-gradient(135deg, #6a6a6a 0%, #ff8c00 100%);
+            border-radius: 10px;
+            color: white;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .carousel-container {
+            margin-bottom: 30px;
+        }
+
+        .carousel-title {
+            text-align: center;
+            font-size: 18px;
+            color: #ff8c00;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .carousel {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .carousel-btn {
+            background: #ff8c00;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .carousel-btn:hover {
+            background: #6a6a6a;
+            transform: scale(1.1);
+        }
+
+        .carousel-btn:active {
+            transform: scale(0.95);
+        }
+
+        .carousel-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: scale(1);
+        }
+
+        .image-container {
+            width: 200px;
+            height: 200px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            position: relative;
+            background: #f8f9fa;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .person-number {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 140, 0, 0.9);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #6a6a6a 0%, #ff8c00 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 140, 0, 0.4);
+        }
+
+        .action-btn:active {
+            transform: translateY(0);
+        }
+
+        .action-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .feedback {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 16px;
+            display: none;
+        }
+
+        .feedback.success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .feedback.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .fullscreen-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s;
+        }
+
+        .fullscreen-overlay.active {
+            display: flex;
+        }
+
+        .fullscreen-image {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(255,255,255,0.2);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            color: #ff8c00;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .shake {
+            animation: shake 0.5s;
+        }
+
+        .attempts-warning {
+            text-align: center;
+            color: #721c24;
+            font-weight: bold;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .reset-btn {
+            background: #28a745 !important;
+            margin-top: 10px;
+        }
+
+        .image-error {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 14px;
+            background: #f8f9fa;
+            height: 100%;
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* Responsividade para celular */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .image-container {
+                width: 180px;
+                height: 180px;
+            }
+
+            .carousel-btn {
+                width: 35px;
+                height: 35px;
+                font-size: 18px;
+            }
+
+            .score-value {
+                font-size: 20px;
+            }
+
+            .carousel-title {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Jogo de Correspondência</h1>
+
+        <div class="score-board">
+            <div class="score-item">
+                <div class="score-label">Pontuação</div>
+                <div class="score-value" id="score">0</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">Tentativas</div>
+                <div class="score-value" id="attempts">5</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">Acertos</div>
+                <div class="score-value" id="matches">0</div>
+            </div>
+        </div>
+
+        <div class="carousel-container">
+            <div class="carousel-title">👤 Selecione o Rosto</div>
+            <div class="carousel">
+                <button class="carousel-btn" id="prevFace">◀</button>
+                <div class="image-container">
+                    <img id="faceImage" src="" alt="Rosto">
+                    <div class="person-number" id="faceNumber">1</div>
+                </div>
+                <button class="carousel-btn" id="nextFace">▶</button>
+            </div>
+        </div>
+
+        <div class="carousel-container">
+            <div class="carousel-title">👣 Selecione os Pés</div>
+            <div class="carousel">
+                <button class="carousel-btn" id="prevFeet">◀</button>
+                <div class="image-container">
+                    <img id="feetImage" src="" alt="Pés">
+                    <div class="person-number" id="feetNumber">1</div>
+                </div>
+                <button class="carousel-btn" id="nextFeet">▶</button>
+            </div>
+        </div>
+
+        <button class="action-btn" id="checkBtn">Verificar Correspondência</button>
+
+        <div class="feedback" id="feedback"></div>
+        <div class="attempts-warning" id="attemptsWarning"></div>
+    </div>
+
+    <div class="fullscreen-overlay" id="fullscreenOverlay">
+        <button class="close-btn" id="closeBtn">✕</button>
+        <img class="fullscreen-image" id="fullscreenImage" src="" alt="Foto Completa">
+    </div>
+
+    <script>
+        // 📸 CONFIGURAÇÃO DAS 30 MULHERES - SUAS IMAGENS
+        const people = [
+            { id: 1, face: 'imagens/R1.png', feet: 'imagens/P1.png', full: 'imagens/C1.png' },
+            { id: 2, face: 'imagens/R2.png', feet: 'imagens/P2.png', full: 'imagens/C2.png' },
+            { id: 3, face: 'imagens/R3.png', feet: 'imagens/P3.png', full: 'imagens/C3.png' },
+            { id: 4, face: 'imagens/R4.png', feet: 'imagens/P4.png', full: 'imagens/C4.png' },
+            { id: 5, face: 'imagens/R5.png', feet: 'imagens/P5.png', full: 'imagens/C5.png' },
+            { id: 6, face: 'imagens/R6.png', feet: 'imagens/P6.png', full: 'imagens/C6.png' },
+            { id: 7, face: 'imagens/R7.png', feet: 'imagens/P7.png', full: 'imagens/C7.png' },
+            { id: 8, face: 'imagens/R8.png', feet: 'imagens/P8.png', full: 'imagens/C8.png' },
+            { id: 9, face: 'imagens/R9.png', feet: 'imagens/P9.png', full: 'imagens/C9.png' },
+            { id: 10, face: 'imagens/R10.png', feet: 'imagens/P10.png', full: 'imagens/C10.png' },
+            { id: 11, face: 'imagens/R11.png', feet: 'imagens/P11.png', full: 'imagens/C11.png' },
+            { id: 12, face: 'imagens/R12.png', feet: 'imagens/P12.png', full: 'imagens/C12.png' },
+            { id: 13, face: 'imagens/R13.png', feet: 'imagens/P13.png', full: 'imagens/C13.png' },
+            { id: 14, face: 'imagens/R14.png', feet: 'imagens/P14.png', full: 'imagens/C14.png' },
+            { id: 15, face: 'imagens/R15.png', feet: 'imagens/P15.png', full: 'imagens/C15.png' },
+            { id: 16, face: 'imagens/R16.png', feet: 'imagens/P16.png', full: 'imagens/C16.png' },
+            { id: 17, face: 'imagens/R17.png', feet: 'imagens/P17.png', full: 'imagens/C17.png' },
+            { id: 18, face: 'imagens/R18.png', feet: 'imagens/P18.png', full: 'imagens/C18.png' },
+            { id: 19, face: 'imagens/R19.png', feet: 'imagens/P19.png', full: 'imagens/C19.png' },
+            { id: 20, face: 'imagens/R20.png', feet: 'imagens/P20.png', full: 'imagens/C20.png' },
+            { id: 21, face: 'imagens/R21.png', feet: 'imagens/P21.png', full: 'imagens/C21.png' },
+            { id: 22, face: 'imagens/R22.png', feet: 'imagens/P22.png', full: 'imagens/C22.png' },
+            { id: 23, face: 'imagens/R23.png', feet: 'imagens/P23.png', full: 'imagens/C23.png' },
+            { id: 24, face: 'imagens/R24.png', feet: 'imagens/P24.png', full: 'imagens/C24.png' },
+            { id: 25, face: 'imagens/R25.png', feet: 'imagens/P25.png', full: 'imagens/C25.png' },
+            { id: 26, face: 'imagens/R26.png', feet: 'imagens/P26.png', full: 'imagens/C26.png' },
+            { id: 27, face: 'imagens/R27.png', feet: 'imagens/P27.png', full: 'imagens/C27.png' },
+            { id: 28, face: 'imagens/R28.png', feet: 'imagens/P28.png', full: 'imagens/C28.png' },
+            { id: 29, face: 'imagens/R29.png', feet: 'imagens/P29.png', full: 'imagens/C29.png' },
+            { id: 30, face: 'imagens/R30.png', feet: 'imagens/P30.png', full: 'imagens/C30.png' }
+        ];
+
+        // Estado do jogo
+        let currentFaceIndex = 0;
+        let currentFeetIndex = 0;
+        let score = 0;
+        let attempts = 5; // ✅ ALTERADO PARA 5 TENTATIVAS
+        let matches = 0;
+        let feetOrder = [...Array(30).keys()]; // [0, 1, 2, ..., 29]
+
+        // Elementos DOM
+        const faceImage = document.getElementById('faceImage');
+        const feetImage = document.getElementById('feetImage');
+        const faceNumber = document.getElementById('faceNumber');
+        const feetNumber = document.getElementById('feetNumber');
+        const scoreDisplay = document.getElementById('score');
+        const attemptsDisplay = document.getElementById('attempts');
+        const matchesDisplay = document.getElementById('matches');
+        const feedback = document.getElementById('feedback');
+        const attemptsWarning = document.getElementById('attemptsWarning');
+        const checkBtn = document.getElementById('checkBtn');
+        const fullscreenOverlay = document.getElementById('fullscreenOverlay');
+        const fullscreenImage = document.getElementById('fullscreenImage');
+
+        // Tratamento de erro de imagem
+        function handleImageError(img, defaultText) {
+            const container = img.parentElement;
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'image-error';
+            errorDiv.innerHTML = `📷 ${defaultText}<br><small>Imagem não encontrada</small><br><small style="font-size:10px">${img.src}</small>`;
+            container.innerHTML = '';
+            container.appendChild(errorDiv);
+
+            // Re-adiciona o número
+            const numberDiv = container.id === faceImage.parentElement.id ? faceNumber : feetNumber;
+            container.appendChild(numberDiv);
+        }
+
+        // Sons
+        function playSuccessSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                oscillator.type = 'sine';
+
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } catch(e) {
+                console.log('Som não disponível');
+            }
+        }
+
+        function playErrorSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
+                oscillator.type = 'square';
+
+                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+            } catch(e) {
+                console.log('Som não disponível');
+            }
+        }
+
+        // Função para carregar imagem do rosto
+        function loadFace(index) {
+            const person = people[index];
+            faceNumber.textContent = person.id;
+
+            const container = faceImage.parentElement;
+            container.innerHTML = '';
+            container.appendChild(faceImage);
+            container.appendChild(faceNumber);
+
+            faceImage.src = person.face;
+            faceImage.onerror = () => handleImageError(faceImage, `Rosto ${person.id}`);
+            faceImage.onload = () => faceImage.style.display = 'block';
+        }
+
+        // Função para carregar imagem dos pés
+        function loadFeet(index) {
+            const actualIndex = feetOrder[index];
+            const person = people[actualIndex];
+            feetNumber.textContent = person.id;
+
+            const container = feetImage.parentElement;
+            container.innerHTML = '';
+            container.appendChild(feetImage);
+            container.appendChild(feetNumber);
+
+            feetImage.src = person.feet;
+            feetImage.onerror = () => handleImageError(feetImage, `Pés ${person.id}`);
+            feetImage.onload = () => feetImage.style.display = 'block';
+        }
+
+        // Função para atualizar carrossel de rostos
+        function updateFaceCarousel() {
+            loadFace(currentFaceIndex);
+        }
+
+        // Função para atualizar carrossel de pés
+        function updateFeetCarousel() {
+            loadFeet(currentFeetIndex);
+        }
+
+        // Função para navegar no carrossel de rostos
+        function navigateFace(direction) {
+            if (direction === 'prev') {
+                currentFaceIndex = (currentFaceIndex - 1 + 30) % 30;
+            } else {
+                currentFaceIndex = (currentFaceIndex + 1) % 30;
+            }
+            updateFaceCarousel();
+        }
+
+        // Função para navegar no carrossel de pés
+        function navigateFeet(direction) {
+            if (direction === 'prev') {
+                currentFeetIndex = (currentFeetIndex - 1 + 30) % 30;
+            } else {
+                currentFeetIndex = (currentFeetIndex + 1) % 30;
+            }
+            updateFeetCarousel();
+        }
+
+        // ✅ Função para embaralhar posições dos pés
+        function shuffleFeet() {
+            feetOrder = [...Array(30).keys()];
+            for (let i = feetOrder.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [feetOrder[i], feetOrder[j]] = [feetOrder[j], feetOrder[i]];
+            }
+            currentFeetIndex = 0;
+            updateFeetCarousel();
+        }
+
+        // Função para verificar correspondência
+        function checkMatch() {
+            if (attempts <= 0) return;
+
+            const selectedFacePerson = people[currentFaceIndex];
+            const selectedFeetIndex = feetOrder[currentFeetIndex];
+            const selectedFeetPerson = people[selectedFeetIndex];
+
+            attempts--;
+            updateAttemptsDisplay();
+
+            if (selectedFacePerson.id === selectedFeetPerson.id) {
+                // Acertou!
+                score += 10;
+                matches++;
+                updateScoreDisplay();
+                updateMatchesDisplay();
+
+                playSuccessSound();
+                showFeedback('🎉 Parabéns! Correspondência correta!', 'success');
+                showFullImage(selectedFacePerson.full);
+
+                setTimeout(() => {
+                    attempts = 5; // ✅ RESETAR PARA 5 TENTATIVAS
+                    updateAttemptsDisplay();
+                    hideFeedback();
+                    closeFullscreen();
+                    shuffleFeet();
+                    currentFaceIndex = 0;
+                    updateFaceCarousel();
+                }, 3000);
+
+            } else {
+                // Errou!
+                score -= 5;
+                updateScoreDisplay();
+
+                playErrorSound();
+                showFeedback('❌ Correspondência incorreta!', 'error');
+
+                document.querySelectorAll('.carousel-container').forEach(container => {
+                    container.classList.add('shake');
+                    setTimeout(() => {
+                        container.classList.remove('shake');
+                    }, 500);
+                });
+
+                if (attempts === 0) {
+                    setTimeout(() => {
+                        showFeedback('💡 Tentativas esgotadas! Os pés foram reorganizados. Tente novamente!', 'error');
+                        attempts = 5; // ✅ RESETAR PARA 5 TENTATIVAS
+                        shuffleFeet();
+                        updateAttemptsDisplay();
+                        setTimeout(hideFeedback, 3000);
+                    }, 2000);
+                } else {
+                    setTimeout(hideFeedback, 2000);
+                }
+            }
+        }
+
+        // Funções para atualizar displays
+        function updateScoreDisplay() {
+            scoreDisplay.textContent = score;
+        }
+
+        function updateAttemptsDisplay() {
+            attemptsDisplay.textContent = attempts;
+
+            if (attempts <= 2 &amp;&amp; attempts > 0) {
+                attemptsWarning.textContent = `⚠️ ${attempts} tentativa${attempts === 1 ? '' : 's'} restante${attempts === 1 ? '' : 's'}!`;
+                attemptsWarning.style.display = 'block';
+            } else {
+                attemptsWarning.style.display = 'none';
+            }
+        }
+
+        function updateMatchesDisplay() {
+            matchesDisplay.textContent = matches;
+        }
+
+        // Funções para feedback
+        function showFeedback(message, type) {
+            feedback.textContent = message;
+            feedback.className = `feedback ${type}`;
+            feedback.style.display = 'block';
+        }
+
+        function hideFeedback() {
+            feedback.style.display = 'none';
+        }
+
+        // Funções para tela cheia
+        function showFullImage(imageSrc) {
+            fullscreenImage.src = imageSrc;
+            fullscreenImage.onerror = () => {
+                fullscreenImage.style.display = 'none';
+                const errorDiv = document.createElement('div');
+                errorDiv.style.cssText = 'color: white; text-align: center; font-size: 18px; padding: 20px;';
+                errorDiv.innerHTML = `📷 Foto completa não encontrada<br><small>${imageSrc}</small>`;
+                fullscreenOverlay.insertBefore(errorDiv, fullscreenImage);
+            };
+            fullscreenImage.onload = () => fullscreenImage.style.display = 'block';
+            fullscreenOverlay.classList.add('active');
+        }
+
+        function closeFullscreen() {
+            fullscreenOverlay.classList.remove('active');
+        }
+
+        // Event Listeners
+        document.getElementById('prevFace').addEventListener('click', () => navigateFace('prev'));
+        document.getElementById('nextFace').addEventListener('click', () => navigateFace('next'));
+        document.getElementById('prevFeet').addEventListener('click', () => navigateFeet('prev'));
+        document.getElementById('nextFeet').addEventListener('click', () => navigateFeet('next'));
+        document.getElementById('checkBtn').addEventListener('click', checkMatch);
+        document.getElementById('closeBtn').addEventListener('click', closeFullscreen);
+        fullscreenOverlay.addEventListener('click', (e) => {
+            if (e.target === fullscreenOverlay) closeFullscreen();
+        });
+
+        // Teclas de navegação
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                if (e.ctrlKey) navigateFace('prev');
+                else navigateFeet('prev');
+            } else if (e.key === 'ArrowRight') {
+                if (e.ctrlKey) navigateFace('next');
+                else navigateFeet('next');
+            } else if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                checkMatch();
+            }
+        });
+
+        // Inicialização
+        function init() {
+            // ✅ EMBARALHAR AO INICIAR
+            shuffleFeet();
+
+            updateFaceCarousel();
+            updateFeetCarousel();
+
+            // Criar botão de reset
+            const resetBtn = document.createElement('button');
+            resetBtn.textContent = '🔄 Reiniciar Jogo';
+            resetBtn.className = 'action-btn reset-btn';
+            resetBtn.addEventListener('click', resetGame);
+            document.querySelector('.container').appendChild(resetBtn);
+        }
+
+        // Função para resetar o jogo
+        function resetGame() {
+            score = 0;
+            matches = 0;
+            attempts = 5; // ✅ RESETAR PARA 5 TENTATIVAS
+            currentFaceIndex = 0;
+            currentFeetIndex = 0;
+
+            updateScoreDisplay();
+            updateAttemptsDisplay();
+            updateMatchesDisplay();
+            shuffleFeet(); // ✅ EMBARALHAR AO RESETAR
+            updateFaceCarousel();
+            updateFeetCarousel();
+            hideFeedback();
+            closeFullscreen();
+            attemptsWarning.style.display = 'none';
+        }
+
+        // Iniciar o jogo quando a página carregar
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
